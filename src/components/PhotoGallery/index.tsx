@@ -8,9 +8,10 @@ export type ButtonProps = {
 export const PhotoGallery = ({photos}: ButtonProps) => {
   return (
     <FlatList
+      scrollEnabled={true}
       data={photos}
       numColumns={2}
-      columnWrapperStyle={styles.columnWrapperStyle}
+      // columnWrapperStyle={''}
       renderItem={({item}) => (
         <Image
           style={styles.photo}
@@ -24,12 +25,12 @@ export const PhotoGallery = ({photos}: ButtonProps) => {
 };
 
 const styles = StyleSheet.create({
-  columnWrapperStyle: {
-    justifyContent: 'space-between',
-    paddingBottom: 10,
-  },
+  // columnWrapperStyle: {
+  //   justifyContent: 'space-between',
+  //   paddingBottom: 10,
+  // },
   photo: {
-    width: 182,
-    height: 182,
+    width: 186,
+    height: 186,
   },
 });

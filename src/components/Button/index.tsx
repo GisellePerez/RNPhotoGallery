@@ -1,12 +1,22 @@
 import React, {ReactNode} from 'react';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {Image, Pressable, Text, View} from 'react-native';
+import {styles} from './styles';
+
+export type IconType = 'camera' | 'image';
 
 export type ButtonProps = {
   children: ReactNode | ReactNode[] | string;
   onPress: () => void;
+  icon?: IconType;
+  fullWidth?: boolean;
 };
 
-export const Button = ({children, onPress}: ButtonProps) => {
+export const Button = ({children, onPress, icon, fullWidth}: ButtonProps) => {
+  const iconSource = {
+    camera: require('../../../src/assets/icons/camera.png'),
+    image: require('../../../src/assets/icons/image.png'),
+  };
+
   return (
     <Pressable
       style={({pressed}) => [
@@ -14,24 +24,20 @@ export const Button = ({children, onPress}: ButtonProps) => {
           opacity: pressed ? 0.5 : 1,
         },
         styles.button,
+        fullWidth
+          ? {
+              width: '100%',
+            }
+          : {},
       ]}
       onPress={onPress}>
+      {icon ? (
+        <View style={styles.iconWrapper}>
+          <Image style={styles.icon} source={iconSource[icon]} />
+        </View>
+      ) : null}
+
       <Text style={styles.text}>{children}</Text>
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    flexGrow: 1,
-    padding: 10,
-    backgroundColor: '#818cf8',
-    borderRadius: 4,
-  },
-  text: {
-    textAlign: 'center',
-    color: '#020617',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-});

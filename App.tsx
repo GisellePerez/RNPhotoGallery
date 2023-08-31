@@ -6,26 +6,32 @@
  */
 
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {FlatList, Image, SafeAreaView, Text, View} from 'react-native';
 import {
   CameraOptions,
+  ImageLibraryOptions,
   launchCamera,
   launchImageLibrary,
 } from 'react-native-image-picker';
+import {styles} from './appStyles';
 
 import {Button} from './src/components/Button';
-import {PhotoGallery} from './src/components/PhotoGallery';
-
-// https://github.com/react-native-image-picker/react-native-image-picker/issues/923 // ios has no camera simulator
+import {Modal} from './src/components/Modal';
 
 function App(): JSX.Element {
   const [photos, setPhotos] = useState<string[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalText, setModalText] = useState('');
 
+  /**
+   * Opens the camera and throws a modal with error message if it fails
+   */
   const handleLaunchCamera = () => {
     const options: CameraOptions = {
       mediaType: 'photo',
       saveToPhotos: true,
     };
+
     launchCamera(options, response => {
       const photoUri =
         (response?.assets && response?.assets[0] && response?.assets[0]?.uri) ||
@@ -37,62 +43,94 @@ function App(): JSX.Element {
         setPhotos(updatedPhotosArray);
       }
 
-      // TODO: add alert with camera failure
+      // NOTE:  It appears the camera doesn't work on the emulator, so we throw an error for that case
+      // // https://github.com/react-native-image-picker/react-native-image-picker/issues/923 // ios has no camera simulator
+      if (response?.errorCode || response?.errorMessage) {
+        const friendlyErrorText =
+          response?.errorCode === 'camera_unavailable'
+            ? 'Sorry, the camera is not available on this device'
+            : '';
+
+        setIsModalVisible(true);
+        setModalText(
+          `${response?.errorMessage || `${friendlyErrorText}.` || ''}
+          Error code: ${response?.errorCode}.`,
+        );
+      }
+    });
+  };
+
+  /**
+   * Opens the gallery and throws a modal with error message if it fails
+   */
+  const handleLaunchGallery = () => {
+    const options: ImageLibraryOptions = {
+      mediaType: 'photo',
+    };
+
+    launchImageLibrary(options, response => {
+      if (response?.errorCode || response?.errorMessage) {
+        setIsModalVisible(true);
+        setModalText(`${response?.errorMessage} 
+        Error code: ${response?.errorCode}.`);
+      }
     });
   };
 
   return (
     <SafeAreaView>
-      <View style={styles.wrapper}>
-        <Text style={styles.title}>Photo gallery app</Text>
+      {/* Title */}
+      <Text style={styles.title}>Photo gallery app</Text>
 
-        <View style={styles.buttonsWrapper}>
-          <Button onPress={() => handleLaunchCamera()}>Take photo</Button>
-          <Button onPress={() => launchImageLibrary({mediaType: 'mixed'})}>
-            View gallery
-          </Button>
-        </View>
+      {/* Buttons */}
+      <View style={styles.buttonsWrapper}>
+        <Button icon="camera" onPress={() => handleLaunchCamera()}>
+          Take photo
+        </Button>
 
-        {photos?.length ? (
-          <PhotoGallery photos={photos} />
-        ) : (
-          <View>
-            <Text style={styles.noItemsText}>No photos to display yet.</Text>
-          </View>
-        )}
+        <Button
+          icon="image"
+          // onPress={() => launchImageLibrary({mediaType: 'mixed'})}>
+          onPress={handleLaunchGallery}>
+          View gallery
+        </Button>
       </View>
+
+      {/* Photos list */}
+      {photos?.length ? (
+        <FlatList
+          scrollEnabled={true}
+          data={photos?.length ? photos : []}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapperStyle}
+          renderItem={({item}) => (
+            <Image style={styles.photo} source={{uri: item}} />
+          )}
+        />
+      ) : (
+        <View>
+          {/* Empty list text */}
+          <Text style={styles.noItemsText}>No photos to display yet.</Text>
+        </View>
+      )}
+
+      {/* Error Message Modal */}
+      {isModalVisible && modalText ? (
+        <Modal
+          isModalVisible={isModalVisible}
+          setIsModalVisible={setIsModalVisible}
+          title="There was a problem!"
+          description={modalText}
+          onPressButton={() => {
+            setIsModalVisible(false);
+            setModalText('');
+          }}
+          variant="error"
+          buttonText="Ok"
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-    color: '#6366f1',
-  },
-  buttonsWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 12,
-    paddingVertical: 12,
-  },
-  photo: {
-    width: 200,
-    height: 200,
-  },
-  columnWrapperStyle: {
-    justifyContent: 'space-between',
-    paddingBottom: 10,
-  },
-  noItemsText: {
-    paddingVertical: 30,
-    textAlign: 'center',
-  },
-});
 
 export default App;

@@ -25,27 +25,23 @@ Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _roo
 ### For Android
 
 ```bash
-# using npm
-npm run android
+# using npx
+npx react-native run-android
 
 # OR using Yarn
 yarn android
 
-# OR using npx
-npx react-native run-ios
 ```
 
 ### For iOS
 
 ```bash
-# using npm
-npm run ios
+# using npx
+npx react-native run-ios
 
 # OR using Yarn
 yarn ios
 
-# OR using npx
-npx react-native run-ios
 ```
 
 If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
