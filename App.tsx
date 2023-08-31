@@ -88,10 +88,7 @@ function App(): JSX.Element {
           Take photo
         </Button>
 
-        <Button
-          icon="image"
-          // onPress={() => launchImageLibrary({mediaType: 'mixed'})}>
-          onPress={handleLaunchGallery}>
+        <Button icon="image" onPress={handleLaunchGallery}>
           View gallery
         </Button>
       </View>
